@@ -6,7 +6,7 @@ import pandas as pd
 
 ## Find the data availability in Earthscope
 url = 'https://service.iris.edu/fdsnws/availability/1/extent?format=text&net=NV&cha=*&orderby=nslc_time_quality_samplerate&includerestricted=true&nodata=404'
-
+r = requests.get(url)
 
 
 lines = r.content.decode('utf-8').splitlines()
