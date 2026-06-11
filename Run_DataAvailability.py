@@ -5,8 +5,7 @@ import pandas as pd
 
 
 ## Find the data availability in Earthscope
-url = 'https://service.iris.edu/fdsnws/availability/1/extent?format=text&net=NV&cha=*H*&orderby=nslc_time_quality_samplerate&includerestricted=true&nodata=404'
-r = requests.get(url)
+url = 'https://service.iris.edu/fdsnws/availability/1/extent?format=text&net=NV&cha=*&orderby=nslc_time_quality_samplerate&includerestricted=true&nodata=404'
 
 
 
@@ -23,7 +22,7 @@ df_availability = pd.read_csv(
 )
 
 
-selected_channels = ['EHZ', 'HHZ', 'CHZ', 'CH3', 'HH3', 'HN3', 'HNZ','CNZ','CN3']
+selected_channels = ['EHZ', 'HHZ', 'CHZ', 'CH3', 'HH3', 'HN3', 'HNZ','CNZ','CN3','BNZ','BN3']
 df_filtered = df_availability[df_availability['Channel'].isin(selected_channels)]
 df_filtered
 

@@ -6,7 +6,7 @@ Automated dashboard showing data availability for the **NV seismic network**, up
 
 ## Overview
 
-Queries the [EarthScope FDSN availability service](https://service.iris.edu/fdsnws/availability/1/) for all broadband and short-period vertical channels (`EHZ`, `HHZ`, `CHZ`, `CH3`, `HH3`, `HN3`, `HNZ`, `CNZ`, `CN3`) on the NV network, then generates an interactive Plotly timeline showing the earliest and latest data available for each station/channel.
+Queries the [EarthScope FDSN availability service](https://service.iris.edu/fdsnws/availability/1/) for all broadband,short-period,acceleration vertical channels (`EHZ`, `HHZ`, `CHZ`, `CH3`, `HH3`, `HN3`, `HNZ`, `CNZ`, `CN3`,`BNZ`,`BN3`) on the NV network, then generates an interactive Plotly timeline showing the earliest and latest data available for each station/channel.
 
 ## Repository contents
 
@@ -16,7 +16,7 @@ Queries the [EarthScope FDSN availability service](https://service.iris.edu/fdsn
 | `requirements.txt` | Python dependencies |
 | `.github/workflows/update.yml` | GitHub Actions workflow — runs daily at 06:00 UTC and commits updated outputs |
 | `index.html` | Generated interactive timeline (served via GitHub Pages) |
-| `test.png` | Static snapshot of the latest timeline |
+
 
 ## Running locally
 
