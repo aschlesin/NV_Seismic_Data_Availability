@@ -47,4 +47,4 @@ fig = px.timeline(
 )
 fig.update_yaxes(autorange='reversed')
 fig.write_html('index.html')
-fig.write_image('test.png')
+#fig.write_image('test.png')
