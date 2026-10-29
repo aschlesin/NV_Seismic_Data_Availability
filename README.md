@@ -1,4 +1,5 @@
 # NV Seismic Data Availability
+## Update: October 2026 - FDSN service for underlying requests currently not available - data availability stalled since September 2026
 
 Automated dashboard showing data availability for the **NV seismic network**, updated daily via GitHub Actions.
 
