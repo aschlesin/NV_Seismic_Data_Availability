@@ -1,49 +1,68 @@
-import io
 import requests
-import plotly.express as px 
 import pandas as pd
+import plotly.express as px
 
-
-## Find the data availability in Earthscope
-url = 'https://service.iris.edu/fdsnws/availability/1/extent?format=text&net=NV&cha=*&orderby=nslc_time_quality_samplerate&includerestricted=true&nodata=404'
-r = requests.get(url)
-
-
-lines = r.content.decode('utf-8').splitlines()
-header = [l for l in lines if l.startswith('#')]
-data_lines = [l for l in lines if l and not l.startswith('#')]
-
-columns = header[-1].lstrip('#').split()
-df_availability = pd.read_csv(
-    io.StringIO('\n'.join(data_lines)),
-    sep=r'\s+',
-    names=columns,
-    engine='python'
+url = (
+    'https://service.earthscope.org/mustang/measurements/1/query'
+    '?metric=percent_availability&net=NV&sta=*&loc=*&cha=*&format=json&nodata=404'
 )
+response = requests.get(url, timeout=60)
+response.raise_for_status()
+response_data = response.json()
 
+availability_records = response_data.get('measurements', {}).get('percent_availability', [])
+df_availability = pd.DataFrame(availability_records)
 
-selected_channels = ['EHZ', 'HHZ', 'CHZ', 'CH3', 'HH3', 'HN3', 'HNZ','CNZ','CN3','BNZ','BN3']
-df_filtered = df_availability[df_availability['Channel'].isin(selected_channels)]
-df_filtered
-
-
+selected_channels = ['EHZ', 'HHZ', 'CHZ', 'CH3', 'HH3', 'HN3', 'HNZ', 'CNZ', 'CN3', 'BNZ', 'BN3']
+df_filtered = df_availability[df_availability['cha'].isin(selected_channels)]
 
 plot_df = df_filtered.copy()
-plot_df = plot_df.sort_values(by='Station')
-plot_df['Earliest'] = pd.to_datetime(plot_df['Earliest'])
-plot_df['Latest'] = pd.to_datetime(plot_df['Latest'])
-plot_df['label'] = plot_df['Station'] + '.' +plot_df['Location']+'.'+ plot_df['Channel']
+plot_df['start'] = pd.to_datetime(plot_df['start'])
+plot_df['value'] = pd.to_numeric(plot_df['value'], errors='coerce')
+
+group_columns = ['net', 'sta', 'loc', 'cha', 'qual', 'target']
+annual_df = (
+    plot_df.set_index('start')
+    .groupby(group_columns)['value']
+    .resample('YS')
+    .mean()
+    .rename('annual_availability_pct')
+    .reset_index()
+    .sort_values(['start', 'target'])
+)
+annual_df['period_end'] = annual_df['start'] + pd.DateOffset(years=1)
+annual_df['bar_label'] = (
+    annual_df['sta']
+    + '.'
+    + annual_df['loc'].fillna('')
+    + '.'
+    + annual_df['cha']
+)
 
 fig = px.timeline(
-    plot_df,
-    x_start='Earliest',
-    x_end='Latest',
-    y='label',
-    color='Channel',
-    title='Data Availability — NV Network',
-    labels={'label': 'Station.Location.Channel'},
+    annual_df,
+    x_start='start',
+    x_end='period_end',
+    y='bar_label',
+    color='cha',
+    text='annual_availability_pct',
+    hover_data=['net', 'sta', 'loc', 'cha', 'qual', 'annual_availability_pct'],
+    title='Annual Data Availability — NV Network',
+    labels={
+        'bar_label': 'Station.Location.Channel',
+        'start': 'Year',
+        'cha': 'Channel',
+        'annual_availability_pct': 'Availability (%)',
+    },
     width=1400,
-    height=800,
+    height=max(800, min(5000, 40 * annual_df['bar_label'].nunique())),
 )
+fig.update_traces(
+    texttemplate='%{text:.1f}%',
+    textposition='inside',
+    insidetextanchor='middle',
+    textfont_color='white',
+)
+fig.update_xaxes(tickformat='%Y')
 fig.update_yaxes(autorange='reversed')
 fig.write_html('index.html')
