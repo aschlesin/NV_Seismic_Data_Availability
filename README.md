@@ -1,19 +1,19 @@
 # NV Seismic Data Availability
-## Update: October 2026 - FDSN service for underlying requests currently not available - data availability stalled since September 2026
-
-Automated dashboard showing data availability for the **NV seismic network**, updated daily via GitHub Actions.
+Automated dashboard showing annual data availability for the **NV seismic network**, updated monthly via GitHub Actions.
 
 **Live page:** https://aschlesin.github.io/NV_Seismic_Data_Availability/
 
 ## Overview
 
-Queries the [EarthScope FDSN availability service](https://service.iris.edu/fdsnws/availability/1/) for all broadband,short-period,acceleration vertical channels (`EHZ`, `HHZ`, `CHZ`, `CH3`, `HH3`, `HN3`, `HNZ`, `CNZ`, `CN3`,`BNZ`,`BN3`) on the NV network, then generates an interactive Plotly timeline showing the earliest and latest data available for each station/channel.
+Queries the [EarthScope MUSTANG Measurements service](https://service.earthscope.org/mustang/measurements/1/) for `percent_availability` records on the NV network. The script filters the selected channels (`EHZ`, `HHZ`, `CHZ`, `CH3`, `HH3`, `HN3`, `HNZ`, `CNZ`, `CN3`, `BNZ`, `BN3`), averages their daily availability percentages by calendar year, and generates an interactive Plotly timeline with each annual percentage labeled on its segment.
+
+Annual values average the daily records returned by MUSTANG; missing days are not treated as 0%. The current year is a partial-year value.
 
 ## Repository contents
 
 | File | Description |
 |------|-------------|
-| `Run_DataAvailability.py` | Main script — queries EarthScope, builds the timeline, writes `index.html` and `test.png` |
+| `Run_DataAvailability.py` | Main script — queries MUSTANG, calculates annual availability, and writes `index.html` |
 | `requirements.txt` | Python dependencies |
 | `.github/workflows/update.yml` | GitHub Actions workflow — runs daily at 06:00 UTC and commits updated outputs |
 | `index.html` | Generated interactive timeline (served via GitHub Pages) |
@@ -26,18 +26,18 @@ pip install -r requirements.txt kaleido
 python Run_DataAvailability.py
 ```
 
-Opens `index.html` in a browser to view the interactive chart.
+Open `index.html` in a browser to view the interactive chart.
 
 ## Automation
 
-The GitHub Actions workflow (`.github/workflows/update.yml`) runs every day at 06:00 UTC. It:
+The GitHub Actions workflow (`.github/workflows/update.yml`) runs on the first day of each month at 06:00 UTC. It:
 1. Installs dependencies
 2. Runs `Run_DataAvailability.py`
-3. Commits and pushes updated `index.html` and `test.png` back to the repository
+3. Commits and pushes the updated `index.html` back to the repository
 
 GitHub Pages then serves the updated `index.html` automatically.
 
 ## Data source
 
-[EarthScope / IRIS FDSN Availability Web Service](https://service.iris.edu/fdsnws/availability/1/)
+[EarthScope MUSTANG Measurements Web Service](https://service.earthscope.org/mustang/measurements/1/)
 
